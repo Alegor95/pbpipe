@@ -57,7 +57,7 @@ int read_texteditor(char* lines[MAX_LINE_COUNT]) {
 
 int main(int argc, char** argv) {
   unsigned char listtype = UNLISTED;
-  char* request_format = "api_dev_key=%s&api_option=paste&api_paste_code=%s&api_paste_name=%s";
+  char* request_format = "api_dev_key=%s&api_option=paste&api_paste_code=%s&api_paste_name=%s&api_paste_private=%d";
   char* request;
   char* response;
   char *title = "Created  with PBPASTE", *title_encoded;
@@ -110,7 +110,7 @@ int main(int argc, char** argv) {
 
   request = (char*)malloc(strlen(DEVELOPER_KEY) + strlen(request_format)
     + strlen(encoded) + strlen(title_encoded));
-  sprintf(request, request_format, DEVELOPER_KEY, encoded, title_encoded);
+  sprintf(request, request_format, DEVELOPER_KEY, encoded, title_encoded, listtype);
   response = post(SEND_URL, request, callback);
   //Finalize
   free(code);

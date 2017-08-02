@@ -57,21 +57,40 @@ int read_texteditor(char* lines[MAX_LINE_COUNT]) {
 
 int main(int argc, char** argv) {
   unsigned char listtype = UNLISTED;
-  char* request_format = "api_dev_key=%s&api_option=paste&api_paste_code=%s&api_paste_name=%s&api_paste_private=%d";
-  char* request;
-  char* response;
+  char *request_format = "api_dev_key=%s&api_option=paste&api_paste_code=%s&api_paste_name=%s&api_paste_private=%d&api_paste_expire_date=%s";
+  char *request, *response;
   char *title = "Created  with PBPASTE", *title_encoded;
   char *code, *encoded;
-  char* lines[MAX_LINE_COUNT];
-  int i = 0, line_count;
+  int expires_count = 9;
+  char *expire_values[] = {"N", "10M", "1H", "1D", "1W", "2W", "1M", "6M", "1Y"};
+  char *expires = "1D";
+  char *lines[MAX_LINE_COUNT];
+  int i = 0, j = 0, line_count;
   int code_length = 0, position = 0, len = 0;
   //Read args
   for (i = 1; i < argc; i++) {
     if (argv[i][0] != '-') {
-      printf("Unrecognized option %s\n", argv[i]);
+      fprintf(stderr, "Unrecognized option %s\n", argv[i]);
       return 1;
     }
     switch (argv[i][1]) {
+      case 'e':
+      if (i == argc-1) {
+        fprintf(stderr, "Missed argument for %s\n", argv[i]);
+        return 1;
+      }
+      for (j = 0; j < expires_count; j++) {
+        if (strcmp(expire_values[j], argv[i+1]) == 0) {
+          expires = argv[i+1];
+          i++;
+          break;
+        }
+      }
+      if (j == expires_count) {
+        fprintf(stderr, "Expire option %s is incorrect.\n", argv[i+1]);
+        return 1;
+      }
+      break;
       case 't':
         title = argv[i+1];
         i++;
@@ -83,7 +102,7 @@ int main(int argc, char** argv) {
         listtype = UNLISTED;
       break;
       default:
-      printf("Unknown option %s\n", argv[i]);
+      fprintf(stderr, "Unknown option %s\n", argv[i]);
       return 1;
     }
   }
@@ -94,7 +113,7 @@ int main(int argc, char** argv) {
     //In other cases - use text editor for open
     line_count = read_texteditor(lines);
   }
-  printf("Title: %s, type: %d, lines %d\n", title, listtype, line_count);
+  printf("Title: %s, type: %d, lines %d, expires %s\n", title, listtype, line_count, expires);
   //Count code length
   for (i = 0; i < line_count; i++) {
     code_length += strlen(lines[i]);
@@ -110,7 +129,7 @@ int main(int argc, char** argv) {
 
   request = (char*)malloc(strlen(DEVELOPER_KEY) + strlen(request_format)
     + strlen(encoded) + strlen(title_encoded));
-  sprintf(request, request_format, DEVELOPER_KEY, encoded, title_encoded, listtype);
+  sprintf(request, request_format, DEVELOPER_KEY, encoded, title_encoded, listtype, expires);
   response = post(SEND_URL, request, callback);
   //Finalize
   free(code);

@@ -101,8 +101,16 @@ int main(int argc, char** argv) {
       case 'u':
         listtype = UNLISTED;
       break;
+      case 'h':
+        printf("PASTEBIN PIPE\nAvaliable arguments:\n");
+        printf("-t <title> - set paste title\n");
+        printf("-e <N|10M|1H|1D|1W|2W|1M|6M|1Y> - set paste lifetime\n");
+        printf("-u - mark paste as unlisted\n");
+        printf("-u - mark paste as public\n");
+        return 0;
+      break;
       default:
-      fprintf(stderr, "Unknown option %s\n", argv[i]);
+      fprintf(stderr, "Unknown option %s\nFor list of avaliable options, use %s -h\n", argv[i], argv[0]);
       return 1;
     }
   }
